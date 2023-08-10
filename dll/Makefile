@@ -14,7 +14,7 @@ $(TARGET_LIB) : $(TARGET_OBJ_DIR)/dll.o $(TARGET_OBJ_DIR)/dll_util.o
 	ar rs $@ $(TARGET_OBJ_DIR)/dll.o $(TARGET_OBJ_DIR)/dll_util.o
 
 
-$(TARGET_OBJ_DIR)/dll.o : dll.c dll.h
+$(TARGET_OBJ_DIR)/dll.o : dll.c _dll_.h dll.h
 	mkdir -p $(TARGET_OBJ_DIR)
 	gcc -g -c dll.c -I . -o $@
 

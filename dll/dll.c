@@ -3,15 +3,8 @@
 
 
 #include "dll.h"
+#include "_dll_.h"
 
-
-// private helpers
-
-int _add_dll_node_front(ListDL_t *l, NodeDL_t *node) ;
-int _add_dll_node_end(ListDL_t *l, NodeDL_t *node) ;
-
-NodeDL_t* _new_node(void* data) ;
-void*     _remove_node(ListDL_t* dll, NodeDL_t* node) ;
 
 // public interface
 
@@ -33,6 +26,29 @@ int add_data_to_dll(ListDL_t *l, void *data)
    return _add_dll_node_front(l, wn) ;
 }
 
+int
+dll_sorted_insert(ListDL_t* dll, void* data)
+{
+   if (!dll || !dll->_key_match || !data)   return INVALID_ ;
+
+   NodeDL_t*  node = _new_node(data) ;
+   if (node == NULL)                        return INVALID_ ;
+
+   if (is_dll_empty(dll) == 0 || dll->_key_match(dll->_head->_data, data) >= 0)
+                                 return _add_dll_node_front(dll, node) ;
+   if (dll->_key_match(dll->_end->_data, data) <= 0)
+                                 return _add_dll_node_end(dll, node) ;
+
+   // there is at least one node > date and one < data
+   for (NodeDL_t* curr = dll->_head->_right ; curr ; curr = curr->_right) {
+      if (dll->_key_match(curr->_data, data) >= 0) {
+         curr->_left->_right = node, node->_left = curr->_left ;
+         curr->_left = node, node->_right = curr ;
+         return NO_ERROR ;
+      }
+   }
+   return INVALID_ ;
+}
 
 // drain_dll(): remove& free all nodes - do not free the data
 void drain_dll(ListDL_t* dll)
@@ -67,6 +83,10 @@ int remove_data_from_dll_by_data_ptr(ListDL_t* dll, void *dptr)
    return INVALID_ ;
 }
 
+void dll_register_key_match(ListDL_t* dll, int (*cb_key_match)(void*, void*))
+{
+   dll->_key_match = cb_key_match ;
+}
 
 // private helpers
 
@@ -97,6 +117,7 @@ NodeDL_t* _new_node(void* data) {   // @return - new node for @data
 // add a node to the front
 int _add_dll_node_front(ListDL_t *l, NodeDL_t *node)
 {
+                                                      // printf(" FRONT ") ;
    // no validation checks
    if (!l->_head) { l->_head = l->_end = node ; return NO_ERROR ; }
 
@@ -108,6 +129,7 @@ int _add_dll_node_front(ListDL_t *l, NodeDL_t *node)
 // add a node to the end
 int _add_dll_node_end(ListDL_t *l, NodeDL_t *node)
 {
+                                                    // printf(" END ") ;
    // no validation checks
    if (!l->_end) { l->_head = l->_end = node ; return NO_ERROR ; }
 

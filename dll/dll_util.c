@@ -1,17 +1,21 @@
 // dll_util.c: implementation of DLL utilities (some)
 //
 
+
 #include "dll.h"
+#include "_dll_.h"
 
 
 // do 'f' for each element
 void dll_for_each(ListDL_t* l, NFunction_t f)
 {
-    if (l)   {
-        for (NodeDL_t* curr = l->_head ; curr ; curr = curr->_right) {
-            f(curr->_data) ;
-        }
-    }
+   if (l)   {
+      NodeDL_t* __curr ;
+      for (NodeDL_t* curr = l->_head ; curr ; curr = __curr) {
+         __curr = curr->_right ;            // delete-safe: as a reminder, only
+         f(curr->_data) ;
+      }
+   }
 }
 
 // reverse the list
@@ -22,6 +26,19 @@ void dll_reverse(ListDL_t* dll)
         wn = cn->_right, cn->_right = cn->_left, cn->_left = wn ;
     }
     cn = dll->_end, dll->_end = dll->_head, dll->_head = cn ;
+}
+
+void*                                           // search by 'key'
+dll_search_by_key(ListDL_t* dll, void* key)     // @return: pointer to _data
+{
+    if (dll && dll->_key_match && key)   {
+      CFunction_t  comp = dll->_key_match ;
+
+      for (NodeDL_t* curr = dll->_head ; curr ; curr = curr->_right) {
+         if (comp(curr->_data, key) == 0)   return curr->_data ;
+      }
+   }
+   return NULL ;
 }
 
 
