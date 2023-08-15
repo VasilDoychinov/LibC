@@ -1,0 +1,32 @@
+# Build, etc. the set of Libraries
+#  - BUILD_DIR: build/<target_library>/
+#  - SOURCE_DIR: <target_library>
+
+
+TARGET = exe
+LIBRARY_DIR = ../libraries/bin
+LIBRARY = bitmap
+
+INCLUDE_DIR = ../libraries/$(LIBRARY)
+
+
+$(TARGET) : test_$(LIBRARY).o $(LIBRARY_DIR)/lib$(LIBRARY).a
+	gcc -g test_$(LIBRARY).o -L $(LIBRARY_DIR) -l$(LIBRARY) -o $@
+
+
+test_$(LIBRARY).o : test_$(LIBRARY).c $(INCLUDE_DIR)/$(LIBRARY).h
+	gcc -g -c test_$(LIBRARY).c -I $(INCLUDE_DIR) -o $@
+
+
+$(INCLUDE_DIR)/$(LIBRARY).h:
+	echo "bitmap.h's been updated"
+
+
+.PHONY: run
+run:
+	./exe
+
+.PHONY: clean
+clean:
+	rm *.o $(TARGET) 
+
